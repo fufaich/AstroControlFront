@@ -20,15 +20,17 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col items-center h-screen gap-4">
-    <ButtonComponent label="Задачи" class="space-y-4 mt-4" path="/test"/>
+    <ButtonComponent label="Журнал задач" class="space-y-4 mt-4" path="/table/task_journal"/>
 
-    <ButtonComponent v-if="isAdmin" label="Пользователи" class="space-y-4" path="/test"/>
-    <ButtonComponent v-if="isAdmin" label="Выполненные задачи" class="space-y-4" path="/test"/>
+    <ButtonComponent v-if="isAdmin" label="Пользователи" class="space-y-4" path="/table/users"/>
+    <ButtonComponent v-if="isAdmin" label="Журнал выполненных задач" class="space-y-4" path="/table/completed_tasks"/>
 
-    <ButtonComponent label="Эксперименты" class="space-y-4" path="/test"/>
-    <ButtonComponent label="Миссии" class="space-y-4" path="/test"/>
-    <ButtonComponent label="Ресурсы" class="space-y-4" path="/test"/>
-    <ButtonComponent label="Отчёты" class="space-y-4" path="/test"/>
+    <ButtonComponent label="Журнал экспериментов" class="space-y-4" path="/table/experiment_journal"/>
+    <ButtonComponent label="Миссии" class="space-y-4" path="/table/missions"/>
+    <ButtonComponent label="Ресурсы" class="space-y-4" path="/table/resources"/>
+    <ButtonComponent label="Работники" class="space-y-4" path="/table/employees"/>
+    <ButtonComponent label="Отчёты" class="space-y-4" path="/table/reports_journal"/>
+
 
   </div>
 </template>
