@@ -26,7 +26,7 @@
               {{ row[colIndex] }}
             </td>
             <td class="px-4 py-2 border-b text-center">
-              <button class="text-blue-500 hover:text-blue-700 mr-2" @click="openEditModal(row)">
+              <button class="text-blue-500 hover:text-blue-700 mr-2" @click="openEditModal(row, headers_table)">
                 ✏
               </button>
               <button
@@ -58,10 +58,10 @@
       <div class="bg-white p-6 rounded shadow-md w-96">
         <h3 class="text-lg font-bold mb-4">Edit User</h3>
         <div v-for="(value, key) in editableRow" :key="key" class="mb-3">
-          <label class="block text-sm font-medium mb-1">{{ headers_table[key] }}</label>
+          <label class="block text-sm font-medium mb-1">{{ key }}</label>
           <input
             type="text"
-            v-model="editableRow[headers_table[key]]"
+            v-model="editableRow[key]"
             class="w-full border border-gray-300 rounded px-2 py-1"
           />
         </div>
@@ -129,8 +129,23 @@ const isEditModalOpen = ref(false)
 const editableRow = ref({})
 
 // Открытие модального окна для редактирования
-const openEditModal = (row) => {
-  editableRow.value = { ...row } // Копируем данные строки
+const openEditModal = (row_data, headers) => {
+  const newObject = {};
+
+  let i = 0;
+  headers.forEach((header) => {
+    if (header.includes("id")){
+      header = "id";
+    }
+    newObject[header] = row_data[i++]
+})
+
+  editableRow.value = newObject // Копируем данные строки
+  console.log("headers", headers)
+  console.log("row_data", row_data)
+  console.log("newObject", newObject)
+
+
   isEditModalOpen.value = true
 }
 
@@ -140,17 +155,11 @@ const closeEditModal = () => {
 }
 
 // Сохранение изменений
-const saveEdit = () => {
-  const rowIndex = rows.value.findIndex(
-    (row) => row.id_user === editableRow.value.id_user,
-  )
-
-  console.log("RowIndex", rowIndex)
+const saveEdit = async () => {
   console.log("editableRow", editableRow.value)
-
-  if (rowIndex !== -1) {
-    rows.value[rowIndex] = { ...editableRow.value }
-  }
+  const updateObject = editableRow.value
+  const response = await axios.put(`http://127.0.0.1:5000/${props.table_name}/`, updateObject);
+  console.log(response)
   closeEditModal()
   reloadData()
 }
@@ -243,14 +252,7 @@ const fetchHeadersAndData = async (table_name) => {
 const headers_table = ref([])
 const rows = ref([])
 
-// Функция для добавления пользователя
-const addUser = () => {
-  const newUser = {}
-  headers_table.value.forEach((header) => {
-    newUser[header] = 'default'
-  })
-  rows.value.push(newUser)
-}
+
 
 // Функция для удаления пользователя
 const deleteUser = async (primary_key, index) => {
