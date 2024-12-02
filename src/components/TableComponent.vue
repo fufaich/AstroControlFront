@@ -12,12 +12,25 @@
             <th v-for="header in headers_table" :key="header" class="px-4 py-2 border-b">
               {{ header }}
             </th>
+
             <th class="px-4 py-2 border-b text-center">ACTIONS</th>
+          </tr>
+          <tr>
+            <!-- Генерируем заголовки таблицы -->
+            <th v-for="header in headers_table" :key="header" class="px-4 py-2 border-b">
+              <input
+                @input="onFilterChange()"
+                v-model="filters[header]"
+                class="border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+            </th>
+
+            <th class="px-4 py-2 border-b text-center"></th>
           </tr>
         </thead>
         <tbody>
           <!-- Генерируем строки таблицы -->
-          <tr v-for="(row, rowIndex) in rows" :key="row[0]" class="hover:bg-gray-50">
+          <tr v-for="(row, rowIndex) in rows" :key="row" class="hover:bg-gray-50">
             <td
               v-for="(header, colIndex) in headers_table"
               :key="colIndex"
@@ -26,12 +39,16 @@
               {{ row[colIndex] }}
             </td>
             <td class="px-4 py-2 border-b text-center">
-              <button class="text-blue-500 hover:text-blue-700 mr-2" @click="openEditModal(row, headers_table)">
+              <button class="text-blue-500 hover:text-blue-700 mr-2" @click="openEditModal(row, headers_table)"
+                      v-if="match_privilege[role][table_name]['edit']"
+              >
                 ✏
               </button>
               <button
                 class="text-red-500 hover:text-red-700"
-                @click="deleteUser(headers_table[0], row[0])"
+                @click="deleteUser(headers_table, row)"
+                v-if="match_privilege[role][table_name]['edit']"
+
               >
                 ✖
               </button>
@@ -45,9 +62,10 @@
     <button
       class="mt-4 flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none"
       @click="openAddModal"
+      v-if="match_privilege[role][table_name]['add']"
     >
       <span class="text-lg">+</span>
-      <span class="ml-2">Add User</span>
+      <span class="ml-2">Add</span>
     </button>
 
     <!-- Модальное окно Edit -->
@@ -125,8 +143,25 @@ const props = defineProps({
   table_name: String,
 })
 
+const role = localStorage.getItem('role');
 const isEditModalOpen = ref(false)
 const editableRow = ref({})
+const filters = ref({})
+
+const onFilterChange = () => {
+  // Ваша логика обработки изменений фильтров
+  console.log('Фильтр изменён:', filters.value);
+  filters.value = Object.entries(filters.value)
+      .filter(([key, value]) => value !== '') // Оставляем только те пары, где значение не пустое
+      .reduce((acc, [key, value]) => {
+        acc[key] = value; // Собираем новый объект
+        return acc;
+      }, {});
+  reloadData();
+  // Например, можно выполнить фильтрацию данных
+}
+
+
 
 // Открытие модального окна для редактирования
 const openEditModal = (row_data, headers) => {
@@ -134,10 +169,14 @@ const openEditModal = (row_data, headers) => {
 
   let i = 0;
   headers.forEach((header) => {
-    if (header.includes("id")){
-      header = "id";
-    }
-    newObject[header] = row_data[i++]
+    // if (header.includes("id")){
+    //   header = "id";
+    // }
+
+    newObject[header] = row_data[i]
+    console.log("header: ", header);
+    console.log("i: ", i);
+    i += 1
 })
 
   editableRow.value = newObject // Копируем данные строки
@@ -206,6 +245,74 @@ const match_table_name = {
   reports_journal: 'ReportsJournal',
   experiment_journal: 'ExperimentJournal',
 }
+
+
+const match_privilege = {
+  "admin": {
+    "task_journal": {
+      "add": true,
+      "edit" : true
+    },
+    "users": {
+      "add": true,
+      "edit" : true
+    },
+    "completed_tasks": {
+      "add": true,
+      "edit" : true
+    },
+    "missions": {
+      "add": true,
+      "edit" : true
+    },
+    "resources": {
+      "add": true,
+      "edit" : true
+    },
+    "employees": {
+      "add": true,
+      "edit" : true
+    },
+    "reports_journal": {
+      "add": true,
+      "edit" : true
+    },
+    "experiment_journal": {
+      "add": true,
+      "edit" : true
+    }
+  },
+  "austronaut": {
+    "task_journal": {
+      "add": true,
+      "edit" : true
+    },
+    "completed_tasks": {
+      "add": false,
+      "edit" : false
+    },
+    "missions": {
+      "add": false,
+      "edit" : false
+    },
+    "resources": {
+      "add": true,
+      "edit" : true
+    },
+    "employees": {
+      "add": false,
+      "edit" : false
+    },
+    "reports_journal": {
+      "add": true,
+      "edit" : false
+    },
+    "experiment_journal": {
+      "add": true,
+      "edit" : true
+    }
+  }
+}
 // Настройка axios с токеном
 axios.interceptors.request.use(
   (config) => {
@@ -228,7 +335,11 @@ const add_api = async (object) => {
 const fetchHeadersAndData = async (table_name) => {
   try {
     const headersResponse = await axios.get(`http://127.0.0.1:5000/utils/${match_table_name[table_name]}`);
-    const dataResponse = await axios.get(`http://127.0.0.1:5000/${table_name}/`);
+    const filter = filters.value;
+    console.log("DEBUG :", filter)
+    const dataResponse = await axios.get(`http://127.0.0.1:5000/${table_name}/`, {
+      params : filter
+    });
 
     return {
       headers: headersResponse,
@@ -256,10 +367,15 @@ const rows = ref([])
 
 // Функция для удаления пользователя
 const deleteUser = async (primary_key, index) => {
-  const object = {
-    [primary_key] : index
-  };
-  console.log(object);
+  const object = {};
+  console.log("primary_key: ",primary_key);
+  console.log("index: ",index);
+
+  let i = 0;
+  primary_key.forEach((key) => {
+    object[key] = index[i++];
+  })
+  console.log("Object: ",object);
   const response = await axios.delete(`http://127.0.0.1:5000/${props.table_name}/`, {
     data: object
   });
