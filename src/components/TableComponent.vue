@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
     <!-- Заголовок -->
-    <h2 class="text-2xl font-bold mb-4">{{ match_table_name[table_name] }}</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ ru_match[table_name]["name"] }}</h2>
 
     <!-- Таблица -->
     <div class="overflow-x-auto">
@@ -10,10 +10,10 @@
           <tr>
             <!-- Генерируем заголовки таблицы -->
             <th v-for="header in headers_table" :key="header" class="px-4 py-2 border-b">
-              {{ header }}
+              {{ ru_match[table_name]["headers"][header] }}
             </th>
 
-            <th class="px-4 py-2 border-b text-center">ACTIONS</th>
+            <th class="px-4 py-2 border-b text-center">Действия</th>
           </tr>
           <tr>
             <!-- Генерируем заголовки таблицы -->
@@ -65,7 +65,7 @@
       v-if="match_privilege[role][table_name]['add']"
     >
       <span class="text-lg">+</span>
-      <span class="ml-2">Add</span>
+      <span class="ml-2">Добавить</span>
     </button>
 
     <!-- Модальное окно Edit -->
@@ -74,7 +74,7 @@
       class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center"
     >
       <div class="bg-white p-6 rounded shadow-md w-96">
-        <h3 class="text-lg font-bold mb-4">Edit User</h3>
+        <h3 class="text-lg font-bold mb-4">Изменить</h3>
         <div v-for="(value, key) in editableRow" :key="key" class="mb-3">
           <label class="block text-sm font-medium mb-1">{{ key }}</label>
           <input
@@ -88,13 +88,13 @@
             class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-1 px-3 rounded"
             @click="closeEditModal"
           >
-            Cancel
+            Отменить
           </button>
           <button
             class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
             @click="saveEdit"
           >
-            Save
+            Сохранить
           </button>
         </div>
       </div>
@@ -106,7 +106,7 @@
       class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center"
     >
       <div class="bg-white p-6 rounded shadow-md w-96">
-        <h3 class="text-lg font-bold mb-4">Add New User</h3>
+        <h3 class="text-lg font-bold mb-4">Добавлен</h3>
         <div v-for="header in headers_table" :key="header" class="mb-3">
           <label class="block text-sm font-medium mb-1">{{ header }}</label>
           <input
@@ -120,13 +120,13 @@
             class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-1 px-3 rounded"
             @click="closeAddModal"
           >
-            Cancel
+            Отмена
           </button>
           <button
             class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded"
             @click="saveAdd"
           >
-            Add
+            Сохранить
           </button>
         </div>
       </div>
@@ -246,6 +246,102 @@ const match_table_name = {
   experiment_journal: 'ExperimentJournal',
 }
 
+const ru_match = {
+  "task_journal": { 
+    "name" : "Журнал Задач",
+    "headers" : {
+      "id_task" : "Задача",
+      "description" : "Описание",
+      "deadline" : "Срок выполнения",
+      "status" : "Статус",
+      "id_experiment" : "Эксперимент",
+      "priority" : "Приоритет"
+    }
+  },
+  "users": { 
+    "name" : "Пользователи", 
+    "header" : {
+      "id_user" : "Номер пользоваетля",
+      "username" : "Логин",
+      "pass_hash" : "Хеш-пароль",
+      "role" : "Роль"
+    }
+  },
+  "completed_tasks": { 
+    "name" : "Выполненные задачи",
+    "header" : {
+    "id_resource" : "Ресурс",
+    "id_report" : "Отчёт",
+    "id_task" : "Задача",
+    "id_employee" : "Работник"
+    }
+
+  },
+  "missions": { 
+    "name" : "Миссии",
+    "header" : {
+      "id_mission" : "Номер миссии",
+      "name" : "Название", 
+      "start_mission" : "Начало миссии",
+      "end_mission" : "Конец миссии",
+      "description" : "Описание", 
+      "status_mission" : "Статус",
+      "id_employee" : "Работник"
+    }
+  },
+  "resources": { 
+    "name" : "Ресурсы",
+    "headers" : {
+      "id_resources" : "Номер ресурса",
+      "name" : "Название", 
+      "count" : "Количество",
+      "unit" : "Способ измерения"
+    }
+  },
+  "employees": { 
+    "name" : "Работники",
+    "headers" : {
+      "id_employee" : "Номер работника",
+      "surname" : "Фамилия",
+      "name" : "Имя",
+      "middle_name" : "Отчество",
+      "post" : "Должность",
+      "specialization" : "Специализация",
+      "date_of_birth" : "Дата рождения",
+      "status_employee" : "Статус"
+    }
+  },
+  "reports_journal": { 
+    "name" : "Журнал отчётов",
+    "headers" : {
+      "id_report" : "Номер отчёта",
+      "header" : "Заголовок",
+      "content" : "Материал",
+      "data" : "Дата",
+      "id_employee" : "Работник"
+    }
+  },
+  "experiment_journal": { 
+    "name" : "Журнал экспериментов",
+    "headers" : {
+      "id_experiment" : "Номер эксперимента",
+      "name" : "Название",
+      "description" : "Описание",
+      "start_experiment" : "Начало",
+      "end_experiment" : "Конец",
+      "status" : "Статус",
+      "id_employee" : "Работник",
+      "id_mission" : "Миссия"
+    }
+  } 
+}
+
+const ru_match_col = {
+
+  "id_resource" : "Ресурс",
+  "id_employee" : "Работник",
+  "id_mission" : "Миссии"
+}
 
 const match_privilege = {
   "admin": {
@@ -402,6 +498,7 @@ const loadData = async () => {
 onMounted(async () => {
   const { headers, data } = await fetchHeadersAndData(props.table_name);
   headers_table.value = (headers.data).map((value) => value[0]);
+  console.log(headers_table.value)
   rows.value = data.data;
 })
 </script>
